@@ -1,21 +1,35 @@
 package main
 
 import (
-	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+
+	"github.com/tendermint/tmlibs/cli"
+
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/keys"
+	"github.com/cosmos/cosmos-sdk/client/lcd"
+	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/client/tx"
+
+	"github.com/cosmos/cosmos-sdk/version"
+	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
+	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
+	ibccmd "github.com/cosmos/cosmos-sdk/x/ibc/client/cli"
+	stakecmd "github.com/cosmos/cosmos-sdk/x/stake/client/cli"
 
 	"github.com/andrey-solomenniy-test/standarta/app"
-	"github.com/spf13/cobra"
+	"github.com/andrey-solomenniy-test/standarta/types"
 )
 
-//"github.com/andrey-solomenniy-test/standarta/app"
-
 // rootCmd is the entry point for this binary
-// var (
-// 	rootCmd = &cobra.Command{
-// 		Use:   "standartacli",
-// 		Short: "StandartACoin light-client",
-// 	}
-// )
+var (
+	rootCmd = &cobra.Command{
+		Use:   "standartacli",
+		Short: "StandartA light-client",
+	}
+)
 
 func main() {
 	// disable sorting
@@ -23,51 +37,44 @@ func main() {
 
 	// get the codec
 	cdc := app.MakeCodec()
-	fmt.Println(cdc)
 
-	// // TODO: setup keybase, viper object, etc. to be passed into
-	// // the below functions and eliminate global vars, like we do
-	// // with the cdc
+	// TODO: setup keybase, viper object, etc. to be passed into
+	// the below functions and eliminate global vars, like we do
+	// with the cdc
 
-	// // add standard rpc, and tx commands
-	// rpc.AddCommands(rootCmd)
-	// rootCmd.AddCommand(client.LineBreak)
-	// tx.AddCommands(rootCmd, cdc)
-	// rootCmd.AddCommand(client.LineBreak)
+	// add standard rpc, and tx commands
+	rpc.AddCommands(rootCmd)
+	rootCmd.AddCommand(client.LineBreak)
+	tx.AddCommands(rootCmd, cdc)
+	rootCmd.AddCommand(client.LineBreak)
 
-	// // add query/post commands (custom to binary)
-	// rootCmd.AddCommand(
-	// 	client.GetCommands(
-	// 		authcmd.GetAccountCmd("main", cdc, types.GetAccountDecoder(cdc)),
-	// 	)...)
-	// rootCmd.AddCommand(
-	// 	client.PostCommands(
-	// 		bankcmd.SendTxCmd(cdc),
-	// 	)...)
-	// rootCmd.AddCommand(
-	// 	client.PostCommands(
-	// 		ibccmd.IBCTransferCmd(cdc),
-	// 	)...)
-	// rootCmd.AddCommand(
-	// 	client.PostCommands(
-	// 		ibccmd.IBCRelayCmd(cdc),
-	// 		simplestakingcmd.BondTxCmd(cdc),
-	// 	)...)
-	// rootCmd.AddCommand(
-	// 	client.PostCommands(
-	// 		simplestakingcmd.UnbondTxCmd(cdc),
-	// 	)...)
+	// add query/post commands (custom to binary)
+	rootCmd.AddCommand(
+		client.GetCommands(
+			authcmd.GetAccountCmd("acc", cdc, types.GetAccountDecoder(cdc)),
+		)...)
 
-	// // add proxy, version and key info
-	// rootCmd.AddCommand(
-	// 	client.LineBreak,
-	// 	lcd.ServeCommand(cdc),
-	// 	keys.Commands(),
-	// 	client.LineBreak,
-	// 	version.VersionCmd,
-	// )
+	rootCmd.AddCommand(
+		client.PostCommands(
+			bankcmd.SendTxCmd(cdc),
+			ibccmd.IBCTransferCmd(cdc),
+			ibccmd.IBCRelayCmd(cdc),
+			stakecmd.GetCmdDeclareCandidacy(cdc),
+			stakecmd.GetCmdEditCandidacy(cdc),
+			stakecmd.GetCmdDelegate(cdc),
+			stakecmd.GetCmdUnbond(cdc),
+		)...)
 
-	// // prepare and add flags
-	// executor := cli.PrepareMainCmd(rootCmd, "BC", os.ExpandEnv("$HOME/.standartacli"))
-	// executor.Execute()
+	// add proxy, version and key info
+	rootCmd.AddCommand(
+		client.LineBreak,
+		lcd.ServeCommand(cdc),
+		keys.Commands(),
+		client.LineBreak,
+		version.VersionCmd,
+	)
+
+	// prepare and add flags
+	executor := cli.PrepareMainCmd(rootCmd, "BC", os.ExpandEnv("$HOME/.standartacli"))
+	executor.Execute()
 }

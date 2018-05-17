@@ -1,9 +1,9 @@
 package types
 
 import (
-	sdk "github.com/andrey-solomenniy-test/standarta/sdk/types"
-	"github.com/andrey-solomenniy-test/standarta/sdk/wire"
-	"github.com/andrey-solomenniy-test/standarta/sdk/x/auth"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/wire"
+	"github.com/cosmos/cosmos-sdk/x/auth"
 )
 
 var _ sdk.Account = (*AppAccount)(nil)
